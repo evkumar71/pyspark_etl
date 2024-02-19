@@ -1,5 +1,6 @@
 The basic project structure is as shown below:
 
+```
 root/
  |-- configs/
  |   |-- etl_config.json
@@ -17,3 +18,4 @@ root/
  |   packages.zip
  |   Pipfile
  |   Pipfile.lock
+```
