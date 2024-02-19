@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession, DataFrameWriter, Window
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
+from dependencies import logging
 
 meta_sch = StructType([
     StructField("Nasdaq Traded", StringType()),
@@ -101,6 +102,11 @@ def find_sma(sym: str):
 
 if __name__ == '__main__':
     spark = get_session()
+    log = logging.Log4j(spark)
+
+    log.info("Created spark session")
     df = datastore()
     df.show(10)
+
+    log.info("Stopping spark session")
     spark.stop()
