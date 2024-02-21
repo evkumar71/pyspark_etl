@@ -1,4 +1,4 @@
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, Window
 from pyspark.sql.functions import *
 from datastore import DataStore
 from config import app_config
@@ -19,10 +19,10 @@ class Prepare():
 
     # Simple Moving Average
     def find_sma(self, df: DataFrame):
-        df.groupby(year(df['Date']).alias('year'), month(df['Date']).alias('month')) \
-            .agg(avg('Close').alias('simple moving avg')) \
-            .orderBy('year', 'month') \
-            .show(5)
+        winSpec = Window.partitionBy(year(df['Date']), month(df['Date'])) \
+                        .orderBy(df['Date']).rowsBetween(-4,Window.currentRow)
+        df2 = df.withColumn('movingAvg', avg(df['close']).over(winSpec))
+        df2.show(3)
 
     def process_sym(self):
         cls = DataStore(ses=cls_pre.spark, config=cls_pre.config)
@@ -54,7 +54,7 @@ if __name__ == '__main__':
         .getOrCreate()
 
     cls_pre = Prepare(spark)
-    cls_pre.process_sym()
+    # cls_pre.process_sym()
     cls_pre.calc_avg()
 
     spark.stop()
