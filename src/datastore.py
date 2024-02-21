@@ -1,9 +1,8 @@
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, DataFrameWriter
 from pyspark.sql.types import *
 
 
 class DataStore:
-
     schema_csv = StructType([
         StructField('Date', DateType()),
         StructField('Open', DoubleType()),
@@ -30,20 +29,43 @@ class DataStore:
     ])
 
     def __init__(self, spark, config):
+        self.spark = spark
+        self.config = config
 
     def load_symbol(self, symbol) -> DataFrame:
-        df_meta = self.load_metadata()
-        df_symbol = self.load_symbol_raw()
-        df_meta.join(df_symbol) # enrich symbol with long symbol name
-        return symbol
+        df_meta = self.load_metadata(symbol)
+        df_symbol = self.load_symbol_raw(symbol)
+        df_meta.join(df_symbol)  # enrich symbol with long symbol name
+
+        return df_meta
 
     def load_metadata(self):
-        return None
+        csv_path = "datafiles/symbols_valid_meta.csv"
+        df = self.spark.read.csv(csv_path, schema=DataStore.schema_meta, header=True)
 
+        df2 = df.select(df['Nasdaq Traded'].alias('nasdaqTraded'),
+                        df['Symbol'].alias('symbol'),
+                        df['Security Name'].alias('securityName'),
+                        df['Listing Exchange'].alias('listingExchange'),
+                        df['Market Category'].alias('marketCategory'),
+                        df['ETF'].alias('etf'),
+                        df['Round Lot Size'].alias('roundLotSize'),
+                        df['Test Issue'].alias('testIssue'),
+                        df['Financial Status'].alias('financialStatus'),
+                        df['CQS Symbol'].alias('cqsSymbol'),
+                        df['NASDAQ Symbol'].alias('nasdaqSymbol'),
+                        df['NextShares'].alias('nextShares')
+                        )
+        return df2
 
-    def load_symbol_raw(self):
-        return None
+    def load_symbol_raw(self, sym):
+        csv_path = f"datafiles/{sym}.csv"
+        df = self.spark.read.csv(csv_path, schema=DataStore.schema_csv, header=True)
 
+        return df
 
-    def write_target(self, df, name):
-        return None
+    def write_target(self, df, sym):
+        pq_path = f"derived/{sym}.parquet"
+        # DataFrameWriter
+        df_writer = DataFrameWriter(df)
+        df_writer.parquet(path=pq_path, mode="overwrite")
