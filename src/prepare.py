@@ -29,6 +29,7 @@ if __name__ == '__main__':
 
     for sym in symbols:
         df_csv = cls.load_symbol_raw(sym)
+        cls.write_target(df_csv, sym)
         df_csv.show(2)
 
     spark.stop()

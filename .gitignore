@@ -1,6 +1,6 @@
 /.venv/
 /.idea/
+/data/
 /datafiles/
 /derived/
-/src/__pycache__/
-/dependencies/__pycache__/
+/*/__pycache__/
