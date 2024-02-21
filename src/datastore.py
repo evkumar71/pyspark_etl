@@ -28,12 +28,12 @@ class DataStore:
         StructField("NextShares", StringType())
     ])
 
-    def __init__(self, spark, config):
-        self.spark = spark
+    def __init__(self, ses, config=None):
+        self.spark = ses
         self.config = config
 
     def load_symbol(self, symbol) -> DataFrame:
-        df_meta = self.load_metadata(symbol)
+        df_meta = self.load_metadata()
         df_symbol = self.load_symbol_raw(symbol)
         df_meta.join(df_symbol)  # enrich symbol with long symbol name
 
