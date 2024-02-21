@@ -1,4 +1,4 @@
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from datastore import DataStore
 from config import app_config
@@ -10,7 +10,7 @@ class Prepare():
         self.config = app_config['data']
         self.symbols = symbols = ['ZUO', 'ZVO', 'ZYME', 'ZYNE', 'ZYXI']
 
-    def find_max(df: DataFrame):
+    def find_max(self,df: DataFrame, sym):
         df2 = df.withColumn('sym', lit(sym))
         df2.groupby(df2['sym'], year(df2['Date']).alias('year')) \
             .agg(min('Close').alias('minClose'), max('Close').alias('maxClose')) \
@@ -18,7 +18,7 @@ class Prepare():
             .show(5)
 
     # Simple Moving Average
-    def find_sma(df: DataFrame):
+    def find_sma(self, df: DataFrame):
         df.groupby(year(df['Date']).alias('year'), month(df['Date']).alias('month')) \
             .agg(avg('Close').alias('simple moving avg')) \
             .orderBy('year', 'month') \
@@ -38,9 +38,13 @@ class Prepare():
             df_new.show(2)
 
     def calc_avg(self):
+        cls = DataStore(ses=cls_pre.spark, config=cls_pre.config)
+
         for sym in self.symbols:
-            self.find_max()
-            self.find_sma()
+            df = cls.load_symbol_raw(sym)
+            self.find_max(df, sym)
+            self.find_sma(df)
+
 
 if __name__ == '__main__':
     spark = SparkSession \
@@ -51,5 +55,6 @@ if __name__ == '__main__':
 
     cls_pre = Prepare(spark)
     cls_pre.process_sym()
+    cls_pre.calc_avg()
 
     spark.stop()
