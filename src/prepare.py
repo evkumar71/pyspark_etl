@@ -31,6 +31,8 @@ if __name__ == '__main__':
         df_csv = cls.load_symbol_raw(sym)
         cls.write_target(df_csv, sym)
         df_parq = cls.read_target(sym)
-        df_parq.show(2)
+        df_new = df_parq.join(df_meta, df_meta['nasdaqSymbol'] == sym) \
+                        .select(df_parq['*'], df_meta['nasdaqSymbol'], df_meta['securityName'])
+        df_new.show(2)
 
     spark.stop()
