@@ -1,4 +1,4 @@
-from pyspark.sql import DataFrame, DataFrameWriter
+from pyspark.sql import DataFrame, DataFrameWriter, DataFrameReader
 from pyspark.sql.types import *
 
 
@@ -69,3 +69,11 @@ class DataStore:
         # DataFrameWriter
         df_writer = DataFrameWriter(df)
         df_writer.parquet(path=pq_path, mode="overwrite")
+
+    def read_target(self, sym) -> DataFrame:
+        pq_path = f"derived/{sym}.parquet"
+
+        df_reader = DataFrameReader(self.spark)
+        df = df_reader.parquet(pq_path)
+        return df
+
