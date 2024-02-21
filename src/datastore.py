@@ -40,7 +40,7 @@ class DataStore:
         return df_meta
 
     def load_metadata(self):
-        csv_path = "datafiles/symbols_valid_meta.csv"
+        csv_path = f"{self.config['raw_layer']}/symbols_valid_meta.csv"
         df = self.spark.read.csv(csv_path, schema=DataStore.schema_meta, header=True)
 
         df2 = df.select(df['Nasdaq Traded'].alias('nasdaqTraded'),
@@ -59,19 +59,19 @@ class DataStore:
         return df2
 
     def load_symbol_raw(self, sym):
-        csv_path = f"datafiles/{sym}.csv"
+        csv_path = f"{self.config['raw_layer']}/{sym}.csv"
         df = self.spark.read.csv(csv_path, schema=DataStore.schema_csv, header=True)
 
         return df
 
     def write_target(self, df, sym):
-        pq_path = f"derived/{sym}.parquet"
+        pq_path = f"{self.config['drv_layer']}/{sym}.parquet"
         # DataFrameWriter
         df_writer = DataFrameWriter(df)
         df_writer.parquet(path=pq_path, mode="overwrite")
 
     def read_target(self, sym) -> DataFrame:
-        pq_path = f"derived/{sym}.parquet"
+        pq_path = f"{self.config['drv_layer']}/{sym}.parquet"
 
         df_reader = DataFrameReader(self.spark)
         df = df_reader.parquet(pq_path)

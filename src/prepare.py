@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from datastore import DataStore
+from config import app_config
 
 """
 class PrepareData:
@@ -21,7 +22,8 @@ if __name__ == '__main__':
         .master("local[*]") \
         .getOrCreate()
 
-    cls = DataStore(ses=spark)
+    print(app_config)
+    cls = DataStore(ses=spark, config=app_config['data'])
     df_meta = cls.load_metadata()
     df_meta.show(5)
 

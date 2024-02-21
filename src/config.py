@@ -3,9 +3,9 @@ app_config = {
         "app": "etl-loader",
         "master": "local[*]"
     },
-    "data": {
+    'data': {
         "base_dir": "data/",
-        "raw_layer": "base_dir/raw/",
-        "drv_layer": "base_dir/derived/"
+        "raw_layer": "data/raw/",
+        "drv_layer": "data/derived/"
     }
 }
