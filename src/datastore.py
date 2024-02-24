@@ -1,32 +1,9 @@
 from pyspark.sql import DataFrame, DataFrameWriter, DataFrameReader
-from pyspark.sql.types import *
 from pyspark.sql.functions import lit
+from schema import schema_csv, schema_meta
+
 
 class DataStore:
-    schema_csv = StructType([
-        StructField('Date', DateType()),
-        StructField('Open', DoubleType()),
-        StructField('High', DoubleType()),
-        StructField('Low', DoubleType()),
-        StructField('Close', DoubleType()),
-        StructField('Adj Close', DoubleType()),
-        StructField('Volume', LongType())
-    ])
-
-    schema_meta = StructType([
-        StructField("Nasdaq Traded", StringType()),
-        StructField("Symbol", StringType()),
-        StructField("Security Name", StringType()),
-        StructField("listing Exchange", StringType()),
-        StructField("Market Category", StringType()),
-        StructField("ETF", StringType()),
-        StructField("Round Lot Size", DoubleType()),
-        StructField("Test Issue", StringType()),
-        StructField("Financial Status", StringType()),
-        StructField("CQS Symbol", StringType()),
-        StructField("NASDAQ Symbol", StringType()),
-        StructField("NextShares", StringType())
-    ])
 
     def __init__(self, spark, config=None):
         self.spark = spark
@@ -41,7 +18,7 @@ class DataStore:
 
     def load_metadata(self):
         csv_path = f"{self.config['raw_layer']}/symbols_valid_meta.csv"
-        df = self.spark.read.csv(csv_path, schema=DataStore.schema_meta, header=True)
+        df = self.spark.read.csv(csv_path, schema=schema_meta, header=True)
 
         df2 = df.select(df['Nasdaq Traded'].alias('nasdaqTraded'),
                         df['Symbol'].alias('symbol'),
@@ -60,7 +37,7 @@ class DataStore:
 
     def load_symbol_raw(self, sym) -> DataFrame:
         csv_path = f"{self.config['raw_layer']}/{sym}.csv"
-        df = self.spark.read.csv(csv_path, schema=DataStore.schema_csv, header=True)
+        df = self.spark.read.csv(csv_path, schema=schema_csv, header=True)
 
         return df
 
@@ -76,4 +53,3 @@ class DataStore:
         df_reader = DataFrameReader(self.spark)
         df = df_reader.parquet(pq_path)
         return df
-
