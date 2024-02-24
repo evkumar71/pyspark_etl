@@ -9,6 +9,17 @@ class DataStore:
         self.spark = spark
         self.config = config
 
+    def rename_columns(self, df: DataFrame):
+        dic = {}
+        for col in df.columns:
+            lis = col.split()
+            new_name = lis[0].lower()
+            if len(lis) > 1:
+                new_name = f"{lis[0].lower()}{lis[1].capitalize()}"
+            dic[col] = new_name
+
+        return df.withColumnsRenamed(dic)
+
     def load_symbol(self, symbol) -> DataFrame:
         df_meta = self.load_metadata().select('symbol', 'securityName')
         df_sym = self.load_symbol_raw(symbol).withColumn('sym', lit(symbol))
@@ -20,26 +31,13 @@ class DataStore:
         csv_path = f"{self.config['raw_layer']}/symbols_valid_meta.csv"
         df = self.spark.read.csv(csv_path, schema=schema_meta, header=True)
 
-        df2 = df.select(df['Nasdaq Traded'].alias('nasdaqTraded'),
-                        df['Symbol'].alias('symbol'),
-                        df['Security Name'].alias('securityName'),
-                        df['Listing Exchange'].alias('listingExchange'),
-                        df['Market Category'].alias('marketCategory'),
-                        df['ETF'].alias('etf'),
-                        df['Round Lot Size'].alias('roundLotSize'),
-                        df['Test Issue'].alias('testIssue'),
-                        df['Financial Status'].alias('financialStatus'),
-                        df['CQS Symbol'].alias('cqsSymbol'),
-                        df['NASDAQ Symbol'].alias('nasdaqSymbol'),
-                        df['NextShares'].alias('nextShares')
-                        )
-        return df2
+        return self.rename_columns(df)
 
     def load_symbol_raw(self, sym) -> DataFrame:
         csv_path = f"{self.config['raw_layer']}/{sym}.csv"
         df = self.spark.read.csv(csv_path, schema=schema_csv, header=True)
 
-        return df
+        return self.rename_columns(df)
 
     def write_target(self, df, sym):
         pq_path = f"{self.config['drv_layer']}/{sym}.parquet"
