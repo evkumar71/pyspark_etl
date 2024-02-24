@@ -1,7 +1,7 @@
 app_config = {
     "spark": {
-        "app": "etl-loader",
-        "master": "local[*]"
+        "spark.app.name": "etl-loader",
+        "spark.master": "local[*]"
     },
     'data': {
         "base_dir": "data/",
