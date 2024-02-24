@@ -1,6 +1,6 @@
 from pyspark.sql import DataFrame, DataFrameWriter, DataFrameReader
 from pyspark.sql.types import *
-
+from pyspark.sql.functions import lit
 
 class DataStore:
     schema_csv = StructType([
@@ -28,16 +28,16 @@ class DataStore:
         StructField("NextShares", StringType())
     ])
 
-    def __init__(self, ses, config=None):
-        self.spark = ses
+    def __init__(self, spark, config=None):
+        self.spark = spark
         self.config = config
 
     def load_symbol(self, symbol) -> DataFrame:
-        df_meta = self.load_metadata()
-        df_symbol = self.load_symbol_raw(symbol)
-        df_meta.join(df_symbol)  # enrich symbol with long symbol name
+        df_meta = self.load_metadata().select('symbol', 'securityName')
+        df_sym = self.load_symbol_raw(symbol).withColumn('sym', lit(symbol))
+        df_symbol = df_sym.join(df_meta, df_sym['sym'] == df_meta['symbol'])
 
-        return df_meta
+        return df_symbol
 
     def load_metadata(self):
         csv_path = f"{self.config['raw_layer']}/symbols_valid_meta.csv"
@@ -58,7 +58,7 @@ class DataStore:
                         )
         return df2
 
-    def load_symbol_raw(self, sym):
+    def load_symbol_raw(self, sym) -> DataFrame:
         csv_path = f"{self.config['raw_layer']}/{sym}.csv"
         df = self.spark.read.csv(csv_path, schema=DataStore.schema_csv, header=True)
 

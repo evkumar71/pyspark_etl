@@ -5,17 +5,22 @@ from config import app_config
 
 
 class Prepare():
-    def __init__(self, ses):
-        self.spark = ses
+    def __init__(self, spark):
+        self.spark = spark
         self.config = app_config['data']
         self.symbols = symbols = ['ZUO', 'ZVO', 'ZYME', 'ZYNE', 'ZYXI']
+        self.obj_ds = DataStore(spark=self.spark, config=self.config)
 
     def find_max(self,df: DataFrame, sym):
-        df2 = df.withColumn('sym', lit(sym))
-        df2.groupby(df2['sym'], year(df2['Date']).alias('year')) \
-            .agg(min('Close').alias('minClose'), max('Close').alias('maxClose')) \
-            .orderBy(col('year')) \
-            .show(5)
+        winSpec = Window.partitionBy(year(df['Date']).alias('year')) \
+                        .orderBy(year(df['Date']))
+        df2 = df.withColumn('maxClose', max(df['Close']).over(winSpec))
+        df2.show(5)
+
+        # df.groupby(df['sym'], year(df['Date']).alias('year')) \
+        #     .agg(min('Close').alias('minClose'), max('Close').alias('maxClose')) \
+        #     .orderBy(col('year')) \
+        #     .show(5)
 
     # Simple Moving Average
     def find_sma(self, df: DataFrame):
@@ -25,36 +30,34 @@ class Prepare():
         df2.show(3)
 
     def process_sym(self):
-        cls = DataStore(ses=cls_pre.spark, config=cls_pre.config)
-        df_meta = cls.load_metadata()
+        obj_ds = self.obj_ds
+        df_meta = obj_ds.load_metadata()
         df_meta.show(5)
 
         for sym in self.symbols:
-            df_csv = cls.load_symbol_raw(sym)
-            cls.write_target(df_csv, sym)
-            df_parq = cls.read_target(sym)
-            df_new = df_parq.join(df_meta, df_meta['nasdaqSymbol'] == sym) \
-                .select(df_parq['*'], df_meta['nasdaqSymbol'], df_meta['securityName'])
-            df_new.show(2)
+            df_csv = obj_ds.load_symbol(sym)
+            obj_ds.write_target(df_csv, sym)
+            df_parq = obj_ds.read_target(sym)
+            df_parq.show(2)
 
     def calc_avg(self):
-        cls = DataStore(ses=cls_pre.spark, config=cls_pre.config)
+        obj_ds = self.obj_ds
 
         for sym in self.symbols:
-            df = cls.load_symbol_raw(sym)
+            df = obj_ds.load_symbol(sym)
             self.find_max(df, sym)
-            self.find_sma(df)
+            # self.find_sma(df)
 
 
 if __name__ == '__main__':
-    spark = SparkSession \
+    spark_ses = SparkSession \
         .builder \
         .appName("spark etl") \
         .master("local[*]") \
         .getOrCreate()
 
-    cls_pre = Prepare(spark)
-    # cls_pre.process_sym()
-    cls_pre.calc_avg()
+    obj_pre = Prepare(spark_ses)
+    obj_pre.process_sym()
+    obj_pre.calc_avg()
 
-    spark.stop()
+    spark_ses.stop()
