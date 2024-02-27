@@ -22,8 +22,8 @@ class DataStore:
 
     def load_symbol(self, symbol) -> DataFrame:
         df_meta = self.load_metadata().select('symbol', 'securityName')
-        df_sym = self.load_symbol_raw(symbol).withColumn('sym', lit(symbol))
-        df_symbol = df_sym.join(df_meta, df_sym['sym'] == df_meta['symbol'])
+        df_symbol = self.load_symbol_raw(symbol).withColumn('sym', lit(symbol))
+        df_symbol.join(df_meta, df_symbol['sym'] == df_meta['symbol'])
 
         return df_symbol
 
