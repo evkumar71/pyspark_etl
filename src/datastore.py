@@ -34,13 +34,10 @@ class DataStore:
 
     def write_target(self, df, sym):
         pq_path = f"{self.config['drv_layer']}/{sym}.parquet"
-        # DataFrameWriter
-        df_writer = DataFrameWriter(df)
-        df_writer.parquet(path=pq_path, mode="overwrite")
+        df.write.parquet(path=pq_path, mode="overwrite")
 
     def read_target(self, sym) -> DataFrame:
         pq_path = f"{self.config['drv_layer']}/{sym}.parquet"
-
-        df_reader = DataFrameReader(self.spark)
-        df = df_reader.parquet(pq_path)
+        df = self.spark.read.parquet(pq_path)
+        
         return df
