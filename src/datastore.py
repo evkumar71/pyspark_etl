@@ -1,24 +1,17 @@
 from pyspark.sql import DataFrame, DataFrameWriter, DataFrameReader
 from pyspark.sql.functions import lit
 from schema import schema_csv, schema_meta
+from utils import rename_columns
 
 
 class DataStore:
 
-    def __init__(self, spark, config=None):
-        self.spark = spark
-        self.config = config
-
-    def rename_columns(self, df: DataFrame):
-        dic = {}
-        for col in df.columns:
-            lis = col.split()
-            new_name = lis[0].lower()
-            if len(lis) > 1:
-                new_name = f"{lis[0].lower()}{lis[1].capitalize()}"
-            dic[col] = new_name
-
-        return df.withColumnsRenamed(dic)
+    # def __init__(self, spark, config=None):
+    #     self.spark = spark
+    #     self.config = config
+    def __init__(self, context):
+        self.spark = context.spark
+        self.config = context.config['data']
 
     def load_symbol(self, symbol) -> DataFrame:
         df_meta = self.load_metadata().select('symbol', 'securityName')
@@ -31,13 +24,13 @@ class DataStore:
         csv_path = f"{self.config['raw_layer']}/symbols_valid_meta.csv"
         df = self.spark.read.csv(csv_path, schema=schema_meta, header=True)
 
-        return self.rename_columns(df)
+        return rename_columns(df)
 
     def load_symbol_raw(self, sym) -> DataFrame:
         csv_path = f"{self.config['raw_layer']}/{sym}.csv"
         df = self.spark.read.csv(csv_path, schema=schema_csv, header=True)
 
-        return self.rename_columns(df)
+        return rename_columns(df)
 
     def write_target(self, df, sym):
         pq_path = f"{self.config['drv_layer']}/{sym}.parquet"
