@@ -6,9 +6,6 @@ from utils import rename_columns
 
 class DataStore:
 
-    # def __init__(self, spark, config=None):
-    #     self.spark = spark
-    #     self.config = config
     def __init__(self, context):
         self.spark = context.spark
         self.config = context.config['data']

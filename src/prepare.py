@@ -1,26 +1,30 @@
-from metrics import *
+from appcontext import AppContext
+from datastore import DataStore
 
 
 class Prepare:
 
-    def __init__(self, spark, obj):
-        self.spark = spark
-        self.symbols = symbols = ['ZUO', 'ZVO', 'ZYME', 'ZYNE', 'ZYXI']
-        self.obj_ds = obj
+    def __init__(self, context):
+        self.obj_ds = DataStore(context)
 
-    def process_sym(self):
+    def process_sym(self, symbol):
         df_meta = self.obj_ds.load_metadata()
         df_meta.show(5)
 
-        for sym in self.symbols:
-            obj_ds = self.obj_ds
-            df_csv = obj_ds.load_symbol(sym)
-            obj_ds.write_target(df_csv, sym)
-            df_parq = obj_ds.read_target(sym)
-            df_parq.show(2)
+        obj_ds = self.obj_ds
+        df_csv = obj_ds.load_symbol(symbol)
+        obj_ds.write_target(df_csv, symbol)
+        df_parq = obj_ds.read_target(symbol)
+        df_parq.show(2)
 
-    def calc_avg(self):
-        for sym in self.symbols:
-            df = self.obj_ds.load_symbol(sym)
-            find_max(df, sym)
-            find_sma(df)
+
+def main():
+    context = AppContext("config/config.json")
+    obj_pre = Prepare(context)
+    obj_pre.process_sym('ZUO')
+
+    context.spark.stop()
+
+
+if __name__ == '__main__':
+    main()
