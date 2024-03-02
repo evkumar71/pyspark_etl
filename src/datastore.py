@@ -19,7 +19,6 @@ class DataStore:
 
         return df_symbol.join(df_meta, df_symbol['sym'] == df_meta['symbol'])
 
-        #return df_symbol
 
     def load_metadata(self):
         csv_path = f"{self.config['raw_layer']}/symbols_valid_meta.csv"

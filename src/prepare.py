@@ -2,6 +2,7 @@ from metrics import *
 
 
 class Prepare:
+
     def __init__(self, spark, obj):
         self.spark = spark
         self.symbols = symbols = ['ZUO', 'ZVO', 'ZYME', 'ZYNE', 'ZYXI']
