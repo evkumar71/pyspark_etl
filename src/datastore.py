@@ -16,9 +16,9 @@ class DataStore:
     def load_symbol(self, symbol) -> DataFrame:
         df_meta = self.load_metadata().select('symbol', 'securityName')
         df_symbol = self.load_symbol_raw(symbol).withColumn('sym', lit(symbol))
-        df_symbol.join(df_meta, df_symbol['sym'] == df_meta['symbol'])
 
-        return df_symbol
+        return df_symbol.join(df_meta, df_symbol['sym'] == df_meta['symbol'])
+
 
     def load_metadata(self):
         csv_path = f"{self.config['raw_layer']}/symbols_valid_meta.csv"
