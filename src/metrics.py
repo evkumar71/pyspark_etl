@@ -8,11 +8,12 @@ class Metrics:
     def __init__(self, context):
         self.obj_ds = DataStore(context)
 
-    def find_max(self, df: DataFrame):
-        winSpec = Window.partitionBy(year(df['date']).alias('year')) \
-            .orderBy(year(df['date']))
+    def highest_close(self, df: DataFrame):
+        df = df.withColumn('year', year('date'))
+        winSpec = Window.partitionBy('year').orderBy('year')
         df2 = df.withColumn('maxClose', max(df['close']).over(winSpec))
-        df2.show(5)
+        df3 = df2.filter("close == maxClose")
+        df3.show(5)
 
     # Simple Moving Average
     def find_sma(self, df: DataFrame):
@@ -26,7 +27,7 @@ def main():
     context = AppContext("config/config.json")
     met = Metrics(context)
     df = met.obj_ds.load_symbol('ZUO')
-    met.find_max(df)
+    met.highest_close(df)
     met.find_sma(df)
 
     context.spark.stop()
