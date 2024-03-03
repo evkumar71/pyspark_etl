@@ -1,5 +1,6 @@
 import json
 from pyspark.sql import SparkSession
+from pyspark.conf import SparkConf
 
 
 class AppContext:
@@ -15,9 +16,13 @@ class AppContext:
         return cfg
 
     def get_session(self):
+        conf = SparkConf()
+        for k, v in self.config['spark'].items():
+            conf.set(k, v)
+
         ses = SparkSession \
                 .builder \
-                .config(map=self.config['spark']) \
+                .config(conf=conf) \
                 .getOrCreate()
 
         return ses
