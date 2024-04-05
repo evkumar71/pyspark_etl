@@ -13,7 +13,8 @@ class Metrics:
         winSpec = Window.partitionBy('year').orderBy('year')
         df2 = df.withColumn('maxClose', max(df['close']).over(winSpec))
         df3 = df2.filter("close == maxClose")
-        df3.show(5)
+        df4 = df3.limit(3).select('date', 'maxClose')
+        return df4
 
     # Simple Moving Average
     def find_sma(self, df: DataFrame):
