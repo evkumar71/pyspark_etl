@@ -1,22 +1,28 @@
 import json
 from pyspark.sql import SparkSession
+from pyspark.conf import SparkConf
 
 
-class app_context():
-    def __init__(self):
-        self.config = self.load_config()
+class AppContext:
+
+    def __init__(self, cfg):
+        self.config = self.load_config(cfg)
         self.spark = self.get_session()
 
-    def load_config(self):
-        with open("config/config.json", "r") as fh:
+    def load_config(self, config):
+        with open(config, "r") as fh:
             cfg = json.load(fh)
 
         return cfg
 
     def get_session(self):
+        conf = SparkConf()
+        for k, v in self.config['spark'].items():
+            conf.set(k, v)
+
         ses = SparkSession \
                 .builder \
-                .config(map=self.config['spark']) \
+                .config(conf=conf) \
                 .getOrCreate()
 
         return ses
