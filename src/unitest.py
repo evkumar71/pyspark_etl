@@ -3,7 +3,7 @@ import unittest
 from typing import Iterable, Any
 from pyspark.testing import assertDataFrameEqual
 from pyspark.sql import SparkSession
-from src.metrics import Metrics
+from metrics import Metrics
 from appcontext import AppContext
 
 
