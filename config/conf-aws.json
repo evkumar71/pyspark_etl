@@ -1,0 +1,10 @@
+{
+    "spark": {
+        "spark.app.name": "aws-etl-loader"
+    },
+    "data": {
+        "base_dir": "s3://vijay-pyspark-etl/data/",
+        "raw_layer": "s3://vijay-pyspark-etl/data/raw/",
+        "drv_layer": "s3://vijay-pyspark-etl/data/derived/"
+    }
+}
