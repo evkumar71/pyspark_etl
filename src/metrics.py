@@ -2,6 +2,7 @@ from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import year, month, max, avg
 from appcontext import AppContext
 from datastore import DataStore
+import sys
 
 
 class Metrics:
@@ -14,6 +15,7 @@ class Metrics:
         df2 = df.withColumn('maxClose', max(df['close']).over(winSpec))
         df3 = df2.filter("close == maxClose")
         df4 = df3.limit(3).select('date', 'maxClose')
+        df4.show()
         return df4
 
     # Simple Moving Average
@@ -25,7 +27,11 @@ class Metrics:
 
 
 def main():
-    context = AppContext("config/config.json")
+    if len(sys.argv) > 1:
+        context = AppContext(sys.argv[1])
+    else:
+        context = AppContext("config/config.json")
+
     met = Metrics(context)
     df = met.obj_ds.load_symbol('ZUO')
     met.highest_close(df)

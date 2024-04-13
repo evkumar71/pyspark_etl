@@ -1,6 +1,6 @@
 from appcontext import AppContext
 from datastore import DataStore
-
+import sys
 
 class Prepare:
 
@@ -19,7 +19,10 @@ class Prepare:
 
 
 def main():
-    context = AppContext("config/config.json")
+    if len(sys.argv) > 1:
+        context = AppContext(sys.argv[1])
+    else:
+        context = AppContext("config/config.json")
     obj_pre = Prepare(context)
     obj_pre.process_sym('ZUO')
 
