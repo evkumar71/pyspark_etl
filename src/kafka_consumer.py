@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StringType
-from pyspark.sql.functions import col
+from pyspark.sql.types import StringType, DateType
+from pyspark.sql.functions import col, year
 
 # Run instruction
 # spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 src/kafka_consumer.py
@@ -16,7 +16,7 @@ spark = SparkSession \
 df = spark.readStream \
         .format("kafka") \
         .option("kafka.bootstrap.servers", "localhost:9092") \
-        .option("subscribe", "kafka-topic-1") \
+        .option("subscribe", "test-topic-1") \
         .option("startingOffsets", "earliest") \
         .load() \
         .select(col('key').cast(StringType()), col('value').cast(StringType()))
