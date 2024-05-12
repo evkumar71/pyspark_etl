@@ -2,6 +2,7 @@
 /.idea/
 /data/
 /logs/
+/build/
 /*/__pycache__/
 /*/pytest_cache/
 /spark-3.5.1-bin-hadoop3/
