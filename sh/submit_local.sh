@@ -7,6 +7,6 @@ source "${PROJECT_ROOT}"/venv/bin/activate
 "${SPARK_HOME}"/bin/spark-submit \
   --deploy-mode client \
   --master local[*] \
-  "${SRC_DIR}/prepare.py" "${CONFIG_DIR}/conf.json"
+  "${SRC_DIR}/prepare.py" "${CONFIG_DIR}/config.json"
 
 deactivate
