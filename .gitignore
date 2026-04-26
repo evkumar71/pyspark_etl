@@ -7,3 +7,5 @@
 /*/pytest_cache/
 /spark-3.5.1-bin-hadoop3/
 jupyter/notebook/.ipynb_checkpoints/
+.DS_Store
+*.pem

@@ -1,0 +1,2 @@
+pyspark==3.5.1
+venv-pack==0.2.0
