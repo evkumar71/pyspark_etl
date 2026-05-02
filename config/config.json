@@ -6,6 +6,7 @@
     "data": {
         "base_dir": "data/",
         "raw_layer": "data/raw/",
-        "drv_layer": "data/derived/"
+        "drv_layer": "data/derived/",
+        "staging_layer": "data/staging/"
     }
 }
